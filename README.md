@@ -1,102 +1,95 @@
-# TRIP-PLANNER-CREWAI
+# AI Crew for Trip Planning
+## Introduction
+This project is an example using the CrewAI framework to automate the process of planning a trip if you are in doubt between different options. CrewAI orchestrates autonomous AI agents, enabling them to collaborate and execute complex tasks efficiently.
 
-Here’s a sample **README** file for your **Trip Planner Crew AI** project:
+By [@joaomdmoura](https://x.com/joaomdmoura)
 
----
+- [CrewAI Framework](#crewai-framework)
+- [Running the script](#running-the-script)
+- [Details & Explanation](#details--explanation)
+- [Using GPT 3.5](#using-gpt-35)
+- [Using Local Models with Ollama](#using-local-models-with-ollama)
+- [Contributing](#contributing)
+- [Support and Contact](#support-and-contact)
+- [License](#license)
 
-# Trip Planner Crew AI
+## CrewAI Framework
+CrewAI is designed to facilitate the collaboration of role-playing AI agents. In this example, these agents work together to choose between different of cities and put together a full itinerary for the trip based on your preferences.
 
-**Trip Planner Crew AI** is an intelligent system that helps travelers plan optimal trips by leveraging Crew AI agents. The agents work collaboratively to gather information, suggest destinations, and create travel itineraries based on user preferences, ensuring a seamless travel experience.
+## Running the Script
+It uses GPT-4 by default so you should have access to that to run it.
 
-## Features
+***Disclaimer:** This will use gpt-4 unless you changed it 
+not to, and by doing so it will cost you money.*
 
-1. **City Selection Expert**: Analyzes travel destinations based on weather, season, and prices to recommend the best cities for your trip.
-2. **Local Expert**: Provides detailed insights on attractions, local customs, and activities in your selected destination.
-3. **Travel Concierge**: Assists in creating an optimized itinerary based on your preferences (e.g., activities, dining, nightlife) while balancing budget and packing suggestions.
-4. **Dynamic Resource Gathering**: Uses a search tool to gather up-to-date information from the web, ensuring that travel suggestions are timely and relevant.
-5. **Optimized Planning**: Integrates a calculator to balance itinerary options, travel costs, and available resources.
+- **Configure Environment**: Copy ``.env.example` and set up the environment variables for [Browseless](https://www.browserless.io/), [Serper](https://serper.dev/) and [OpenAI](https://platform.openai.com/api-keys)
+- **Install Dependencies**: Run `poetry install --no-root`.
+- **Execute the Script**: Run `poetry run python main.py` and input your idea.
 
-## How It Works
+## Details & Explanation
+- **Running the Script**: Execute `python main.py`` and input your idea when prompted. The script will leverage the CrewAI framework to process the idea and generate a landing page.
+- **Key Components**:
+  - `./main.py`: Main script file.
+  - `./trip_tasks.py`: Main file with the tasks prompts.
+  - `./trip_agents.py`: Main file with the agents creation.
+  - `./tools`: Contains tool classes used by the agents.
 
-### Agents
-- **City Selection Expert**: Gathers real-time data from various sources and suggests the best city for your trip based on factors like current weather conditions, travel costs, and events.
-- **Local Expert**: Provides personalized recommendations for activities, cultural insights, and tips on maximizing your experience in your chosen city.
-- **Travel Concierge**: Builds a full travel itinerary with options for transportation, activities, and accommodations, all while adhering to your budget and preferences.
+## Using GPT 3.5
+CrewAI allow you to pass an llm argument to the agent constructor, that will be it's brain, so changing the agent to use GPT-3.5 instead of GPT-4 is as simple as passing that argument on the agent you want to use that LLM (in `main.py`).
+```python
+from langchain.chat_models import ChatOpenAI
 
-### Tools
-- **Search Tool**: Fetches live travel data, including weather updates, local attractions, and events.
-- **Calculator Tool**: Helps optimize trip details like budget allocation, travel schedules, and activity durations.
+llm = ChatOpenAI(model='gpt-3.5') # Loading GPT-3.5
 
-## Setup
-
-1. **Clone the Repository**:
-   ```bash
-   git clone https://github.com/crewAIInc/crewAI-examples.git
-   ```
-
-2. **Install Dependencies**:
-   Ensure that you have Python 3.8 or higher installed. Then, install the required packages:
-   ```bash
-   pip install -r requirements.txt
-   ```
-
-3. **Set up Environment Variables**:
-   Create a `.env` file in the root directory and add your API keys:
-   ```bash
-   GEMINI_API_KEY=your_gemini_api_key_here
-   ```
-
-4. **Run the Application**:
-   Run the main script:
-   ```bash
-   python main.py
-   ```
-
-## Usage
-
-1. When prompted, input your travel preferences such as your starting location, cities of interest, travel dates, and any specific interests (e.g., food, nightlife, adventure).
-2. The system will provide you with an optimized trip plan including destination recommendations, local insights, and a personalized itinerary.
-
-## Example
-
-```
-## Welcome to Trip Planner Crew
--------------------------------
-
-From where will you be traveling from?
->> Patna
-
-What are the cities options you are interested in visiting?
->> Kolkata, Delhi
-
-What is the date range you are interested in traveling?
->> 3rd to 10th November
-
-What are some of your high-level interests and hobbies?
->> Food, markets, nightlife
-
-## Here is your Trip Plan
--------------------------
-City Selection: Kolkata recommended due to favorable weather and budget-friendly options.
-Local Expert: Popular attractions include Victoria Memorial, local food tours, and markets.
-Travel Concierge: Day 1 - Arrival, Day 2 - Food tour, Day 3 - Sightseeing, Day 4 - Night markets...
+def local_expert(self):
+	return Agent(
+		role='Local Expert at this city',
+		goal='Provide the BEST insights about the selected city',
+		backstory="""A knowledgeable local guide with extensive information
+		about the city, it's attractions and customs""",
+		tools=[
+			SearchTools.search_internet,
+			BrowserTools.scrape_and_summarize_website,
+		],
+		llm=llm, # <----- passing our llm reference here
+		verbose=True
+	)
 ```
 
-## Dependencies
-- Python 3.8+
-- `langchain-community==0.0.20`
-- `crewai==0.11.0`
-- `requests`
-- `python-dotenv`
+## Using Local Models with Ollama
+The CrewAI framework supports integration with local models, such as Ollama, for enhanced flexibility and customization. This allows you to utilize your own models, which can be particularly useful for specialized tasks or data privacy concerns.
+
+### Setting Up Ollama
+- **Install Ollama**: Ensure that Ollama is properly installed in your environment. Follow the installation guide provided by Ollama for detailed instructions.
+- **Configure Ollama**: Set up Ollama to work with your local model. You will probably need to [tweak the model using a Modelfile](https://github.com/jmorganca/ollama/blob/main/docs/modelfile.md), I'd recommend adding `Observation` as a stop word and playing with `top_p` and `temperature`.
+
+### Integrating Ollama with CrewAI
+- Instantiate Ollama Model: Create an instance of the Ollama model. You can specify the model and the base URL during instantiation. For example:
+
+```python
+from langchain.llms import Ollama
+ollama_openhermes = Ollama(model="agent")
+# Pass Ollama Model to Agents: When creating your agents within the CrewAI framework, you can pass the Ollama model as an argument to the Agent constructor. For instance:
+
+def local_expert(self):
+	return Agent(
+		role='Local Expert at this city',
+		goal='Provide the BEST insights about the selected city',
+		backstory="""A knowledgeable local guide with extensive information
+		about the city, it's attractions and customs""",
+		tools=[
+			SearchTools.search_internet,
+			BrowserTools.scrape_and_summarize_website,
+		],
+		llm=ollama_openhermes, # Ollama model passed here
+		verbose=True
+	)
+```
+
+### Advantages of Using Local Models
+- **Privacy**: Local models allow processing of data within your own infrastructure, ensuring data privacy.
+- **Customization**: You can customize the model to better suit the specific needs of your tasks.
+- **Performance**: Depending on your setup, local models can offer performance benefits, especially in terms of latency.
 
 ## License
-
-This project is licensed under the MIT License. See the [LICENSE](LICENSE) file for details.
-
-## Contributing
-
-We welcome contributions! Please fork the repository and submit a pull request.
-
----
-
-This README provides clear instructions on how to use, set up, and run your **Trip Planner Crew AI** project. Let me know if you need further adjustments!
+This project is released under the MIT License.
